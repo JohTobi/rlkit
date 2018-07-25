@@ -184,7 +184,7 @@ def clip1(x):
 """
 GPU wrappers
 """
-_use_gpu = False
+_use_gpu = True
 
 
 def set_gpu_mode(mode):
