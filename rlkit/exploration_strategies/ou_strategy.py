@@ -21,8 +21,8 @@ class OUStrategy(RawExplorationStrategy, Serializable):
             action_space,
             mu=0,
             theta=0.15,
-            max_sigma=0.3,
-            min_sigma=0.3,
+            max_sigma=0.15, # 0.3
+            min_sigma=0.15, # 0.3
             decay_period=100000,
     ):
         assert len(action_space.shape) == 1

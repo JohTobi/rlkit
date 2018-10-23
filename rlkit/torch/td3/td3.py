@@ -25,8 +25,8 @@ class TD3(TorchRLAlgorithm):
             policy,
             exploration_policy,
 
-            target_policy_noise=0.2,
-            target_policy_noise_clip=0.5,
+            target_policy_noise=0.1, # 0.2
+            target_policy_noise_clip=0.1, # 0.5
             min_num_steps_before_training=1000,
 
             policy_learning_rate=1e-3,
@@ -74,6 +74,7 @@ class TD3(TorchRLAlgorithm):
             lr=policy_learning_rate,
         )
         self.eval_statistics = None
+        self.env = env
 
     def _do_training(self):
         batch = self.get_batch()
@@ -178,6 +179,10 @@ class TD3(TorchRLAlgorithm):
                 'Policy Action',
                 ptu.get_numpy(policy_actions),
             ))
+            # self.eval_statistics.update(create_stats_ordered_dict(
+            #     'Forces',
+            #     ptu.get_numpy(forces),
+            # ))
 
     def get_epoch_snapshot(self, epoch):
         snapshot = super().get_epoch_snapshot(epoch)

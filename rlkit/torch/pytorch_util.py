@@ -180,11 +180,11 @@ def clip1(x):
     return torch.clamp(x, -1, 1)
 
 
-
 """
 GPU wrappers
 """
-_use_gpu = True
+# _use_gpu = True
+_use_gpu = False
 
 
 def set_gpu_mode(mode):

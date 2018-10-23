@@ -1,7 +1,7 @@
 import abc
 import pickle
 import time
-
+import csv
 import gtimer as gt
 import numpy as np
 
@@ -131,10 +131,21 @@ class RLAlgorithm(metaclass=abc.ABCMeta):
                 save_itrs=True,
         ):
             self._start_epoch(epoch)
-            for _ in range(self.num_env_steps_per_epoch):
+            for x in range(self.num_env_steps_per_epoch):
+                if x == 0:
+                    counter = x
+                if counter == 25:
+                    counter = 0
+                counter += 1
                 action, agent_info = self._get_action_and_info(
                     observation,
                 )
+                # if counter == 21:
+                #     print('Scale action')
+                # if counter >= 21:
+                #     scale = 0.1
+                #     action[0] = action[0] * 0.1
+                #     action[1] = action[1] * 0.1
                 if self.render:
                     self.training_env.render()
                 next_ob, raw_reward, terminal, env_info = (
@@ -158,6 +169,36 @@ class RLAlgorithm(metaclass=abc.ABCMeta):
                     observation = self._start_new_rollout()
                 else:
                     observation = next_ob
+                
+                # Simulation
+                # forces = self.env.get_forces()
+                # block_id0 = self.env.get_blocks_positions()[0]
+                # block_id1 = self.env.get_blocks_positions()[1]
+                # dist = self.env.get_goal_pos() - (self.env.get_endeff_pos() - np.array([0, 0, 0.0425]))
+                # dist_norm = np.linalg.norm(dist)
+                # fields=[epoch,x,self.max_path_length,counter,forces,\
+                #         block_id0[0],block_id0[1],block_id0[2],\
+                #         block_id1[0],block_id1[1],block_id1[2],\
+                #         dist[0], dist[1],dist[2],dist_norm]
+                # with open('/home/ama/masterThesis/simulation/data/s3doodad/residualrl/sawyer-compare-sim-hw/run3/id0/sim_train.csv', 'a') as f:
+                #     writer = csv.writer(f)
+                #     writer.writerow(fields)
+
+                # Hardware
+                # forces = self.env._get_endeffector_forces()
+                # torques = self.env._get_endeffector_torques()
+                # block_id1 = self.env.get_block_pose()[:10]
+                # block_id2 = self.env.get_block_pose()[10:20]
+                # dist = self.env._state_goal - self.env._get_endeffector_pose()[:3]
+                # dist_norm = np.linalg.norm(dist)
+                # fields=[epoch,x,self.max_path_length,counter,\
+                #         forces[0], forces[1], forces[2], torques[0],torques[1], torques[2],\
+                #         block_id1[0],block_id1[1],block_id1[2],block_id1[3],block_id1[4],block_id1[5],block_id1[6],\
+                #         block_id2[0],block_id2[1],block_id2[2],block_id2[3],block_id2[4],block_id2[5],block_id2[6],\
+                #         dist[0], dist[1],dist[2],dist_norm]
+                # with open('/home/ama/masterThesis/simulation/data/s3doodad/residualrl/sawyer-human-example/run13/id0/sawyer_train.csv', 'a') as f:
+                #     writer = csv.writer(f)
+                #     writer.writerow(fields)
 
                 gt.stamp('sample')
                 self._try_to_train()
@@ -166,6 +207,7 @@ class RLAlgorithm(metaclass=abc.ABCMeta):
             self._try_to_eval(epoch)
             gt.stamp('eval')
             self._end_epoch()
+            self.env.reset()
 
     def _try_to_train(self):
         if self._can_train():
@@ -178,6 +220,7 @@ class RLAlgorithm(metaclass=abc.ABCMeta):
     def _try_to_eval(self, epoch):
         # logger.save_extra_data(self.get_extra_data_to_save(epoch))
         if self._can_evaluate():
+            # import pdb; pdb.set_trace()
             self.evaluate(epoch)
 
             params = self.get_epoch_snapshot(epoch)
@@ -214,7 +257,6 @@ class RLAlgorithm(metaclass=abc.ABCMeta):
             logger.record_tabular('Sample Time (s)', sample_time)
             logger.record_tabular('Epoch Time (s)', epoch_time)
             logger.record_tabular('Total Train Time (s)', total_time)
-
             logger.record_tabular("Epoch", epoch)
             logger.dump_tabular(with_prefix=False, with_timestamp=False)
         else:

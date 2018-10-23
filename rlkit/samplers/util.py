@@ -35,6 +35,12 @@ def rollout(env, agent, max_path_length=np.inf, animated=False):
         env.render()
     while path_length < max_path_length:
         a, agent_info = agent.get_action(o)
+        # if path_length == 20:
+        #     print('Scale action')
+        # if path_length > 19:
+        #     scale = 0.1
+        #     a[0] = a[0] * scale
+        #     a[1] = a[1] * scale
         next_o, r, d, env_info = env.step(a)
         observations.append(o)
         rewards.append(r)
@@ -48,7 +54,8 @@ def rollout(env, agent, max_path_length=np.inf, animated=False):
         o = next_o
         if animated:
             env.render()
-
+    # print('TEST')
+    # import pdb; pdb.set_trace()
     actions = np.array(actions)
     if len(actions.shape) == 1:
         actions = np.expand_dims(actions, 1)
